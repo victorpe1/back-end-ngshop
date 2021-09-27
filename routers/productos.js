@@ -224,6 +224,20 @@ router.put(
   }
 );
 
+router.get(`/busqueda/:nombre`, async (req, res) => {
+
+
+  const producto = await Producto.find({ nombre: {$regex: '^' + req.params.nombre, $options: 'i'}}).populate("categoria");
+
+  if (!producto)
+    return res
+      .status(500)
+      .json({ success: false, message: "El producto no ha sido encontrado" });
+
+
+  res.status(200).send(producto);
+});
+
 //COMENTARIOS - ESTRELLAS
 
 router.get(`/get/review`, async (req, res) => {
@@ -235,6 +249,19 @@ router.get(`/get/review`, async (req, res) => {
 
   res.status(200).send(ComentarioList);
 });
+
+router.get(`/get/review/:id`, async (req, res) => {
+  const ComentarioList = await Comentario.find({
+    usuario: req.params.id,
+  })
+    .populate("producto", ["_id", "nombre"])
+    .populate("usuario", ["_id", "nombre"]);
+
+  if (!ComentarioList) return res.status(500).json({ success: false });
+
+  res.status(200).send(ComentarioList);
+});
+
 
 router.get(`/review/:id`, async (req, res) => {
   const comentario = await Comentario.find({
