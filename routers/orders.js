@@ -175,7 +175,7 @@ router.get(`/get/review/:id`, async (req, res) => {
   const ComentarioList = await Pedido.find({
     usuario: req.params.id,
   })
-    .select("order_prods")
+    .distinct("order_prods")
     .populate({
       path: "order_prods",
       populate: {
@@ -184,7 +184,10 @@ router.get(`/get/review/:id`, async (req, res) => {
       },
     })
     .populate("usuario", ["_id", "nombre"]);
-    
+
+    //ComentarioList
+
+  
 
   if (!ComentarioList) return res.status(500).json({ success: false });
 
