@@ -87,6 +87,23 @@ router.post(`/`, uploadOption.single("image"), async (req, res) => {
   res.status(200).send(producto);
 });
 
+router.put(`/stock/:id`, async (req, res) => {
+
+  const producto = await Producto.findByIdAndUpdate(
+    req.params.id,
+    {
+      cont_stock: req.body.cont_stock,
+    },
+    { new: true }
+  );
+  
+  if (!producto)
+    return res.status(500).send("Stock no actualizado");
+
+  res.status(200).send(producto);
+
+});
+
 router.put(`/:id`, uploadOption.single("image"), async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     res.status(400).send("ID del producto invalido");

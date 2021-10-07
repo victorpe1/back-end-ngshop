@@ -105,6 +105,8 @@ router.put(`/:id`, async (req, res) => {
   res.send(pedido);
 });
 
+
+
 router.delete(`/:id`, (req, res) => {
   Pedido.findByIdAndRemove(req.params.id)
     .then(async (pedido) => {
