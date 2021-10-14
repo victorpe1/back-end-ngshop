@@ -5,7 +5,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 router.get(`/`, async (req, res) => {
-  const usuariosLista = await Usuario.find().select("-pass_encry");
+  const usuariosLista = await Usuario.find({
+    flgElimUs: false,
+  }).select("-pass_encry");
 
   if (!usuariosLista) return res.status(500).json({ success: false });
 
@@ -76,7 +78,7 @@ router.put(`/:id`, async (req, res) => {
 });
 
 router.post(`/login`, async (req, res) => {
-  const usuario = await Usuario.findOne({ email: req.body.email });
+  const usuario = await Usuario.findOne({ email: req.body.email, flgElimUs: false });
   const secret = process.env.secret;
 
   if (!usuario) return res.status(400).send("Usuario no existe");
@@ -97,29 +99,23 @@ router.post(`/login`, async (req, res) => {
 });
 
 router.post(`/registro`, async (req, res) => {
-  const usuario = new Usuario({
+
+  let usuario = new Usuario({
     nombre: req.body.nombre,
     email: req.body.email,
     pass_encry: bcrypt.hashSync(req.body.password, 10),
-    telef: req.body.telef,
-    admi: req.body.admi,
-    apartamento: req.body.apartamento,
-    cod_postal: req.body.cod_postal,
-    calle: req.body.calle,
-    ciudad: req.body.ciudad,
-    pais: req.body.pais,
+    telef: " ",
+    admi: true,
+    apartamento: " ",
+    cod_postal: " ",
+    calle: " ",
+    ciudad: " ",
+    pais: " ",
   });
-  usuario = await usuario
-    .save()
-    .then((UsuarioCreado) => {
-      res.status(201).json(UsuarioCreado);
-    })
-    .catch((err) => {
-      res.status(500).json({
-        error: err,
-        success: false,
-      });
-    });
+  usuario = await usuario.save()
+
+  if(!usuario)
+    return res.status(400).send('El usuario no ha sido creado!')
 
   res.send(usuario);
 });
@@ -139,26 +135,31 @@ router.get(`/get/cant`, async (req, res) => {
 
 
 router.delete(`/:id`, (req, res) => {
-  Usuario.findByIdAndRemove(req.params.id)
-    .then((usuario) => {
-      if (usuario) {
-        return res.status(200).json({
-          success: true,
-          message: "Eliminado correctamente",
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: "Usuario no encontrada",
-        });
-      }
-    })
-    .catch((error) => {
+  Usuario.findByIdAndUpdate(
+    req.params.id,
+    {
+      flgElimUs: true
+    },
+    { new: true }
+  ).then((usuario) => {
+    if (usuario) {
+      return res.status(200).json({
+        success: true,
+        message: "Eliminado correctamente",
+      });
+    } else {
       return res.status(404).json({
         success: false,
-        error: err,
+        message: "Usuario no encontrada",
       });
+    }
+  })
+  .catch((error) => {
+    return res.status(404).json({
+      success: false,
+      error: err,
     });
+  });
 });
 
 module.exports = router;

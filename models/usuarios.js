@@ -16,10 +16,12 @@ const usuarioSchema = mongoose.Schema({
   telef: {
     type: String,
     required: true,
+    default: "",
   },
   admi: {
     type: Boolean,
     default: false,
+
   },
   apartamento: {
     type: String,
@@ -40,6 +42,10 @@ const usuarioSchema = mongoose.Schema({
   pais: {
     type: String,
     default: "",
+  },
+  flgElimUs: {
+    type: Boolean,
+    default: false,
   },
 });
 

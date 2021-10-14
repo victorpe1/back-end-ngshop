@@ -25,11 +25,14 @@ const categoriasRouter = require("./routers/categorias.js");
 const productosRouter = require("./routers/productos");
 const usuariosRouter = require("./routers/usuarios");
 const ordersRouter = require("./routers/orders");
+const comprasRouter = require("./routers/compra");
+
 
 app.use(`${api}/productos`, productosRouter);
 app.use(`${api}/categorias`, categoriasRouter);
 app.use(`${api}/usuarios`, usuariosRouter);
 app.use(`${api}/orders`, ordersRouter);
+app.use(`${api}/compras`, comprasRouter);
 
 //Database
 mongoose

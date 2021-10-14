@@ -10,6 +10,10 @@ const categoriaSchema = mongoose.Schema({
     },
     color: {
         type: String
+    },
+    flgElimCat: {
+        type: Boolean,
+        default: false,
     }
   });
 

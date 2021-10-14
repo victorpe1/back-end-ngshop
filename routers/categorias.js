@@ -3,7 +3,8 @@ const router = express.Router();
 const Categoria = require("../models/categorias");
 
 router.get(`/`, async (req, res) => {
-  const categoriaList = await Categoria.find();
+  const categoriaList = await Categoria.find({
+    flgElimCat: false });
 
   if (!categoriaList) return res.status(500).json({ success: false });
 
@@ -52,26 +53,31 @@ router.put(`/:id`, async (req, res) => {
 });
 
 router.delete(`/:id`, (req, res) => {
-  Categoria.findByIdAndRemove(req.params.id)
-    .then((categoria) => {
-      if (categoria) {
-        return res.status(200).json({
-          success: true,
-          message: "Eliminado correctamente",
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: "Categoria no encontrada",
-        });
-      }
-    })
-    .catch((error) => {
+  Categoria.findByIdAndUpdate(
+    req.params.id,
+    {
+      flgElimCat: true
+    },
+    { new: true }
+  ).then((cat) => {
+    if (cat) {
+      return res.status(200).json({
+        success: true,
+        message: "Eliminado correctamente",
+      });
+    } else {
       return res.status(404).json({
         success: false,
-        error: err,
+        message: "Categoria no encontrada",
       });
+    }
+  })
+  .catch((error) => {
+    return res.status(404).json({
+      success: false,
+      error: err,
     });
+  });
 });
 
 module.exports = router;

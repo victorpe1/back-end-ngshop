@@ -44,7 +44,7 @@ const pedidoSchema = mongoose.Schema({
   fecha_pedido: {
     type: Date,
     default: Date.now,
-  },
+  }
 });
 
 pedidoSchema.virtual("id").get(function () {

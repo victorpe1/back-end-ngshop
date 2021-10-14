@@ -33,11 +33,24 @@ const uploadOption = multer({ storage: storage });
 
 router.get(`/`, async (req, res) => {
   let filtro = {};
+
+  let productoList = "";
+
   if (req.query.categorias) {
     filtro = { categoria: req.query.categorias.split(",") };
-  }
 
-  const productoList = await Producto.find(filtro).populate("categoria");
+    productoList = await Producto.find(
+        {
+          flgElimProd: false,
+          categoria: req.query.categorias.split(",")
+        },
+    ).populate("categoria");
+  } else {
+
+    productoList = await Producto.find({
+      flgElimProd: false,
+    }).populate("categoria");
+  }
 
   if (!productoList) return res.status(500).json({ success: false });
 
@@ -74,7 +87,7 @@ router.post(`/`, uploadOption.single("image"), async (req, res) => {
     marca: req.body.marca,
     precio: req.body.precio,
     categoria: req.body.categoria,
-    cont_stock: 10,
+    cont_stock: 0,
     calificacion: req.body.calificacion,
     numReviews: req.body.numReviews,
     destacado: req.body.destacado,
@@ -88,7 +101,6 @@ router.post(`/`, uploadOption.single("image"), async (req, res) => {
 });
 
 router.put(`/stock/:id`, async (req, res) => {
-
   const producto = await Producto.findByIdAndUpdate(
     req.params.id,
     {
@@ -96,12 +108,10 @@ router.put(`/stock/:id`, async (req, res) => {
     },
     { new: true }
   );
-  
-  if (!producto)
-    return res.status(500).send("Stock no actualizado");
+
+  if (!producto) return res.status(500).send("Stock no actualizado");
 
   res.status(200).send(producto);
-
 });
 
 router.put(`/:id`, uploadOption.single("image"), async (req, res) => {
@@ -115,8 +125,6 @@ router.put(`/:id`, uploadOption.single("image"), async (req, res) => {
   if (!producto) return res.status(400).send("Producto invalido!");
 
   const file = req.file;
-
-  if (!file) return res.status(400).send("Imagen no encontrado");
 
   //file
   let imagePath;
@@ -156,7 +164,13 @@ router.put(`/:id`, uploadOption.single("image"), async (req, res) => {
 });
 
 router.delete(`/:id`, (req, res) => {
-  Producto.findByIdAndRemove(req.params.id)
+  Producto.findByIdAndUpdate(
+    req.params.id,
+    {
+      flgElimProd: true,
+    },
+    { new: true }
+  )
     .then((producto) => {
       if (producto) {
         return res.status(200).json({
@@ -242,15 +256,14 @@ router.put(
 );
 
 router.get(`/busqueda/:nombre`, async (req, res) => {
-
-
-  const producto = await Producto.find({ nombre: {$regex: '^' + req.params.nombre, $options: 'i'}}).populate("categoria");
+  const producto = await Producto.find({
+    nombre: { $regex: "^" + req.params.nombre, $options: "i" },
+  }).populate("categoria");
 
   if (!producto)
     return res
       .status(500)
       .json({ success: false, message: "El producto no ha sido encontrado" });
-
 
   res.status(200).send(producto);
 });
@@ -279,7 +292,6 @@ router.get(`/get/review/:id`, async (req, res) => {
   res.status(200).send(ComentarioList);
 });
 
-
 router.get(`/review/:id`, async (req, res) => {
   const comentario = await Comentario.find({
     producto: req.params.id,
@@ -296,7 +308,7 @@ router.get(`/review/:id`, async (req, res) => {
 });
 
 router.post(`/review`, async (req, res) => {
-/*  
+  /*  
 {
         "producto": "5f9d5de284992b00247682b3",
         "usuario": "60ad2f88366403045c1442db",
@@ -316,37 +328,34 @@ router.post(`/review`, async (req, res) => {
     estrellas: req.body.estrellas,
   });
 
-  let cant = 0, total_calif = 0;
+  let cant = 0,
+    total_calif = 0;
 
-    let calificaciones = await Comentario.find(
-      { producto: req.body.producto }
-    ).select("estrellas");
+  let calificaciones = await Comentario.find({
+    producto: req.body.producto,
+  }).select("estrellas");
 
-    calificaciones.map( cal => {
+  calificaciones.map((cal) => {
+    total_calif = total_calif + cal.estrellas;
+    cant = cant + 1;
+  });
 
-      total_calif = total_calif + cal.estrellas;
-      cant = cant + 1;
-    });
-
-  let promedioEstrellas = Math.round(total_calif/cant);
-
+  let promedioEstrellas = Math.round(total_calif / cant);
 
   const producto1 = await Producto.findByIdAndUpdate(
     req.body.producto,
     {
       calificacion: promedioEstrellas,
-      numReviews: cant
-    }, 
+      numReviews: cant,
+    },
     { new: true }
   );
-
 
   comentario = await comentario.save();
 
   if (!comentario) return res.status(404).send("Comentario no registrado");
 
-  if (!producto1)
-    return res.status(500).send("Producto no actualizado");
+  if (!producto1) return res.status(500).send("Producto no actualizado");
 
   res.status(200).send(comentario);
 });

@@ -39,7 +39,7 @@ const productoSchema = mongoose.Schema({
     type: Number,
     required: true,
     min: 0,
-    max: 255,
+    max: 256,
   },
   calificacion: {
     type: Number,
@@ -50,6 +50,10 @@ const productoSchema = mongoose.Schema({
     default: 0,
   },
   destacado: {
+    type: Boolean,
+    default: false,
+  },
+  flgElimProd: {
     type: Boolean,
     default: false,
   },

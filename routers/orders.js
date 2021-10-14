@@ -3,6 +3,7 @@ const router = express.Router();
 const Pedido = require("../models/orders");
 const Producto = require("../models/productos");
 const Prod_pedido = require("../models/order-producto");
+
 const stripe = require("stripe")(
   "sk_test_51JbeGwApvJeofVU9XHb3lleEegz4hnsj4Q0AiQBk8OSI3e9hZdTx6LQQUfffJ3T16EGBFTjKPGdho2knotqngukT00XDkZ1lSI"
 );
@@ -108,8 +109,13 @@ router.put(`/:id`, async (req, res) => {
 
 
 router.delete(`/:id`, (req, res) => {
-  Pedido.findByIdAndRemove(req.params.id)
-    .then(async (pedido) => {
+  /*Pedido.findByIdAndUpdate(
+    req.params.id,
+    {
+      flgElimProd: true
+    },
+    { new: true }
+  ).then(async (pedido) => {
       if (pedido) {
         await pedido.order_prods.map(async (order_prod) => {
           await Prod_pedido.findByIdAndRemove(order_prod);
@@ -130,7 +136,7 @@ router.delete(`/:id`, (req, res) => {
         success: false,
         error: err,
       });
-    });
+    });*/
 });
 
 router.get(`/get/ventaTotales`, async (req, res) => {
