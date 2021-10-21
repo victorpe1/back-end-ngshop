@@ -35,6 +35,48 @@ router.get(`/:id`, async (req, res) => {
   res.status(200).send(pedido);
 });
 
+router.put(`/preventaMenos/`, async (req, res) => {
+  
+
+    req.body.order_prods.map(async (order_producto) => {
+      const producto = await Producto.findByIdAndUpdate(
+      order_producto.producto,
+      {$inc: {cont_stock: -order_producto.cantidad}
+      },
+      {new: true}
+      );
+
+      if (!producto) return res.status(500).send("Stock no actualizado");
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Verificado correctamente",
+    });
+
+});
+
+router.put(`/preventaRecuperar/`, async (req, res) => {
+  
+
+  req.body.order_prods.map(async (order_producto) => {
+    const producto = await Producto.findByIdAndUpdate(
+    order_producto.producto,
+    {$inc: {cont_stock: order_producto.cantidad}
+    },
+    {new: true}
+    );
+
+    if (!producto) return res.status(500).send("Stock no actualizado");
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Verificado correctamente",
+  });
+
+});
+
 router.post(`/`, async (req, res) => {
   const order_prod_id = Promise.all(
     req.body.order_prods.map(async (order_producto) => {
@@ -47,13 +89,16 @@ router.post(`/`, async (req, res) => {
       return newOrder_prod._id;
     })
   );
+
   const order_prod_id_resolv = await order_prod_id;
 
   const totalPrecios = await Promise.all(
     order_prod_id_resolv.map(async (order_productoID) => {
+
       let order_producto = await Prod_pedido.findById(
         order_productoID
       ).populate("producto", "precio");
+      
       let total_prodcto =
         order_producto.producto.precio * order_producto.cantidad;
 

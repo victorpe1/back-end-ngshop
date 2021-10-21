@@ -41,6 +41,7 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
     dbName: "e-commerce",
+    //dbName: "miglazedb",
   })
   .then(() => {
     console.log("Database success");
