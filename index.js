@@ -26,13 +26,14 @@ const productosRouter = require("./routers/productos");
 const usuariosRouter = require("./routers/usuarios");
 const ordersRouter = require("./routers/orders");
 const comprasRouter = require("./routers/compra");
-
+const proveedorRouter = require("./routers/proveedor");
 
 app.use(`${api}/productos`, productosRouter);
 app.use(`${api}/categorias`, categoriasRouter);
 app.use(`${api}/usuarios`, usuariosRouter);
 app.use(`${api}/orders`, ordersRouter);
 app.use(`${api}/compras`, comprasRouter);
+app.use(`${api}/proveedor`, proveedorRouter);
 
 //Database
 mongoose

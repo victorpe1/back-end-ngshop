@@ -36,35 +36,11 @@ router.get(`/:id`, async (req, res) => {
 });
 
 router.put(`/preventaMenos/`, async (req, res) => {
-  
-
-    req.body.order_prods.map(async (order_producto) => {
-      const producto = await Producto.findByIdAndUpdate(
-      order_producto.producto,
-      {$inc: {cont_stock: -order_producto.cantidad}
-      },
-      {new: true}
-      );
-
-      if (!producto) return res.status(500).send("Stock no actualizado");
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Verificado correctamente",
-    });
-
-});
-
-router.put(`/preventaRecuperar/`, async (req, res) => {
-  
-
   req.body.order_prods.map(async (order_producto) => {
     const producto = await Producto.findByIdAndUpdate(
-    order_producto.producto,
-    {$inc: {cont_stock: order_producto.cantidad}
-    },
-    {new: true}
+      order_producto.producto,
+      { $inc: { cont_stock: -order_producto.cantidad } },
+      { new: true }
     );
 
     if (!producto) return res.status(500).send("Stock no actualizado");
@@ -74,7 +50,23 @@ router.put(`/preventaRecuperar/`, async (req, res) => {
     success: true,
     message: "Verificado correctamente",
   });
+});
 
+router.put(`/preventaRecuperar/`, async (req, res) => {
+  req.body.order_prods.map(async (order_producto) => {
+    const producto = await Producto.findByIdAndUpdate(
+      order_producto.producto,
+      { $inc: { cont_stock: order_producto.cantidad } },
+      { new: true }
+    );
+
+    if (!producto) return res.status(500).send("Stock no actualizado");
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Verificado correctamente",
+  });
 });
 
 router.post(`/`, async (req, res) => {
@@ -86,6 +78,31 @@ router.post(`/`, async (req, res) => {
       });
       newOrder_prod = await newOrder_prod.save();
 
+      let stock_act = 0,
+        stock_nuevo = 0;
+
+      let stock_actual = await Producto.findById(
+        order_producto.producto
+      ).select("cont_stock");
+
+      stock_act = stock_actual.cont_stock;
+
+      stock_nuevo = stock_act + order_producto.cantidad;
+
+      console.log(stock_nuevo);
+
+      let compra2 = await Producto.findByIdAndUpdate(
+        order_producto.producto,
+        {
+          cont_stock: stock_nuevo,
+        },
+        { new: true }
+      );
+
+      if (!compra2) {
+        return res.status(404).send("Pedido no registrado");
+      }
+
       return newOrder_prod._id;
     })
   );
@@ -94,11 +111,10 @@ router.post(`/`, async (req, res) => {
 
   const totalPrecios = await Promise.all(
     order_prod_id_resolv.map(async (order_productoID) => {
-
       let order_producto = await Prod_pedido.findById(
         order_productoID
       ).populate("producto", "precio");
-      
+
       let total_prodcto =
         order_producto.producto.precio * order_producto.cantidad;
 
@@ -150,8 +166,6 @@ router.put(`/:id`, async (req, res) => {
 
   res.send(pedido);
 });
-
-
 
 router.delete(`/:id`, (req, res) => {
   /*Pedido.findByIdAndUpdate(
@@ -238,9 +252,7 @@ router.get(`/get/review/:id`, async (req, res) => {
     })
     .populate("usuario", ["_id", "nombre"]);
 
-    //ComentarioList
-
-  
+  //ComentarioList
 
   if (!ComentarioList) return res.status(500).json({ success: false });
 
