@@ -76,6 +76,7 @@ router.post(`/`, async (req, res) => {
         cantidad: order_producto.cantidad,
         producto: order_producto.producto,
       });
+      
       newOrder_prod = await newOrder_prod.save();
 
       let stock_act = 0,
@@ -87,9 +88,11 @@ router.post(`/`, async (req, res) => {
 
       stock_act = stock_actual.cont_stock;
 
+      console.log(stock_actual)
+
       stock_nuevo = stock_act + order_producto.cantidad;
 
-      console.log(stock_nuevo);
+      console.log("stock_nuevo " + stock_nuevo);
 
       let compra2 = await Producto.findByIdAndUpdate(
         order_producto.producto,
@@ -107,8 +110,11 @@ router.post(`/`, async (req, res) => {
     })
   );
 
+  
   const order_prod_id_resolv = await order_prod_id;
 
+  console.log (order_prod_id_resolv)
+  
   const totalPrecios = await Promise.all(
     order_prod_id_resolv.map(async (order_productoID) => {
       let order_producto = await Prod_pedido.findById(
