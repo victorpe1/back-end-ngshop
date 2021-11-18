@@ -44,7 +44,7 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
     useCreateIndex: true,
-    dbName: "e-commerce",
+    dbName: process.env.DBNAME,
     //dbName: "miglazedb",
   })
   .then(() => {
@@ -54,8 +54,11 @@ mongoose
     console.log(error);
   });
 
+
+  const PORT = process.env.PORT || 3000;
+
 //Server
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log(api);
   console.log("Starting... 3000   ");
 });
