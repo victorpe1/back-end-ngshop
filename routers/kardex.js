@@ -15,7 +15,6 @@ router.get(`/kardex_simple/:id`, async (req, res) => {
   //console.log(JSON.stringify(aux));
 
   const compraLista = await Compra_producto.find({
-    flgElim: false,
   })
     .populate("producto", "nombre")
     .sort({ fecha_create: -1 });
@@ -176,12 +175,15 @@ router.get(`/kardex_simple/:id`, async (req, res) => {
     json_existencia.push(data);
   }
 
-  console.log(json_existencia)
-
-  
   if (!json_existencia) return res.status(500).json({ success: false });
   res.status(200).send(json_existencia);
 });
+
+router.get(`/kardex_mes/:mes`, async (req, res) => {
+
+
+});
+
 
 router.get(`/ventas/:id`, async (req, res) => {
   /*const ventaLista = await Order_producto.find({})

@@ -90,7 +90,7 @@ router.post(`/`, async (req, res) => {
 
       console.log(stock_actual)
 
-      stock_nuevo = stock_act + order_producto.cantidad;
+      stock_nuevo = stock_act - order_producto.cantidad;
 
       console.log("stock_nuevo " + stock_nuevo);
 

@@ -57,6 +57,31 @@ router.get(`/`, async (req, res) => {
   res.status(200).send(productoList);
 });
 
+router.get(`/completo_anulados/`, async (req, res) => {
+  let filtro = {};
+
+  let productoList = "";
+
+  if (req.query.categorias) {
+    filtro = { categoria: req.query.categorias.split(",") };
+
+    productoList = await Producto.find(
+        {
+          categoria: req.query.categorias.split(",")
+        },
+    ).populate("categoria");
+  } else {
+
+    productoList = await Producto.find({
+      flgElimProd: false,
+    }).populate("categoria");
+  }
+
+  if (!productoList) return res.status(500).json({ success: false });
+
+  res.status(200).send(productoList);
+});
+
 router.get(`/:id`, async (req, res) => {
   const producto = await Producto.findById(req.params.id).populate("categoria");
 
