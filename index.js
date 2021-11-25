@@ -44,8 +44,8 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
     useCreateIndex: true,
-    ///dbName: process.env.DBNAME,
-    dbName: process.env.DBNAME2,
+    dbName: process.env.DBNAME,
+    //dbName: process.env.DBNAME2,
   })
   .then(() => {
     console.log("Database success");
