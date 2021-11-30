@@ -5,9 +5,9 @@ const Producto = require("../models/productos");
 const Compra_producto = require("../models/compra-producto");
 const Order_producto = require("../models/order-producto");
 const Pedido = require("../models/orders");
-
 const Usuario = require("../models/usuarios");
 const mongoose = require("mongoose");
+
 
 router.get(`/kardex_simple/:id`, async (req, res) => {
   var aux = [];
@@ -56,8 +56,7 @@ router.get(`/kardex_simple/:id`, async (req, res) => {
     })
     .select(["order_prods", "producto", "usuario", "fecha_pedido"]);
 
-    
-
+  
     console.log(pedido)
   const ventaListaFiltro = pedido.filter(
     (venta) => venta.order_prods[0].producto._id == req.params.id
@@ -184,18 +183,64 @@ router.get(`/kardex_simple/:id`, async (req, res) => {
   res.status(200).send(json_existencia);
 });
 
-router.get(`/kardex_completo/`, async (req, res) => {
+router.get(`/reporte_diario/`, async (req, res) => {
 
-  const productoList = await Producto.find({}).select("_id");
+  var dia = req.body.dia
+  var mes = req.body.mes
+  var anio = req.body.anio
 
-  productoList.map((value) => {
-    console.log(value._id);
-  });
+  const orderLista = await Pedido.find({
+    estado: 2
+  })
+  .populate("usuario", "nombre")
+  .sort({ fecha_pedido: -1 });
+  const ventaListaFiltro = orderLista.filter(
+    (venta) => venta.fecha_pedido.getDate()+1 == dia && venta.fecha_pedido.getMonth()+1 == mes && venta.fecha_pedido.getFullYear() == anio
+  ); 
+  if (!ventaListaFiltro) return res.status(500).json({ success: false });
 
-  if (!productoList) return res.status(500).json({ success: false });
+res.status(200).send(ventaListaFiltro);
 
-  res.status(200).send(productoList);
 });
+
+router.get(`/reporte_mes/`, async (req, res) => {
+
+  var mes = req.body.mes
+  var anio = req.body.anio
+  
+  const orderLista = await Pedido.find({
+    estado: 2
+  })
+  .populate("usuario", "nombre")
+  .sort({ fecha_pedido: -1 });
+  const ventaListaFiltro = orderLista.filter(
+    (venta) => venta.fecha_pedido.getMonth()+1 == mes && venta.fecha_pedido.getFullYear() == anio
+  ); 
+  if (!ventaListaFiltro) return res.status(500).json({ success: false });
+
+res.status(200).send(ventaListaFiltro);
+
+});
+
+
+router.get(`/reporte_anio/`, async (req, res) => {
+
+  var anio = req.body.anio
+  
+  const orderLista = await Pedido.find({
+    estado: 2
+  })
+  .populate("usuario", "nombre")
+  .sort({ fecha_pedido: -1 });
+  const ventaListaFiltro = orderLista.filter(
+    (venta) => venta.fecha_pedido.getFullYear() == anio
+  ); 
+  if (!ventaListaFiltro) return res.status(500).json({ success: false });
+
+res.status(200).send(ventaListaFiltro);
+
+});
+
 
 router.get(`/ventas/:id`, async (req, res) => {
 

@@ -7,6 +7,7 @@ const authJwt = require("./helpers/jwt");
 require("dotenv/config");
 const errorHandler = require("./helpers/error-main");
 
+
 app.use(cors());
 app.options("*", cors());
 
@@ -44,11 +45,11 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
     useCreateIndex: true,
-    dbName: process.env.DBNAME,
-    //dbName: process.env.DBNAME2,
+    //dbName: process.env.DBNAME,
+    dbName: process.env.DBNAME2,
   })
   .then(() => {
-    console.log("Database success");
+    console.log("Database conectado exitosamente");
   })
   .catch(() => {
     console.log(error);
