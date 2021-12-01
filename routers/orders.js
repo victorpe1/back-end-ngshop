@@ -76,7 +76,7 @@ router.post(`/`, async (req, res) => {
         cantidad: order_producto.cantidad,
         producto: order_producto.producto,
       });
-      
+
       newOrder_prod = await newOrder_prod.save();
 
       let stock_act = 0,
@@ -88,7 +88,7 @@ router.post(`/`, async (req, res) => {
 
       stock_act = stock_actual.cont_stock;
 
-      console.log(stock_actual)
+      console.log(stock_actual);
 
       stock_nuevo = stock_act - order_producto.cantidad;
 
@@ -110,11 +110,10 @@ router.post(`/`, async (req, res) => {
     })
   );
 
-  
   const order_prod_id_resolv = await order_prod_id;
 
-  console.log (order_prod_id_resolv)
-  
+  console.log(order_prod_id_resolv);
+
   const totalPrecios = await Promise.all(
     order_prod_id_resolv.map(async (order_productoID) => {
       let order_producto = await Prod_pedido.findById(
@@ -158,19 +157,35 @@ router.put(`/:id`, async (req, res) => {
     },
     { new: true }
   );
-  pedido = await pedido
-    .save()
-    .then((pedidoActualizado) => {
-      res.status(201).json(pedidoActualizado);
-    })
-    .catch((err) => {
-      res.status(500).json({
-        error: err,
-        success: false,
-      });
-    });
 
-  res.send(pedido);
+  console.log(req.body.estado);
+  if (req.body.estado == 4) {
+    var pedido_producto = req.body.pedido;
+
+    for (let i in pedido_producto.order_prods) {
+      console.log(pedido_producto.order_prods[i].producto);
+
+      const producto_xd = await Producto.findByIdAndUpdate(
+        pedido_producto.order_prods[i].producto._id,
+        {
+          $inc: {
+            cont_stock: pedido_producto.order_prods[i].producto.cont_stock,
+          },
+        },
+        { new: true }
+      );
+
+      if (!producto_xd)
+        return res
+          .status(500)
+          .json({ success: false, message: "No se actualizo" });
+    }
+  }
+
+  if (!pedido)
+    return res.status(500).json({ success: false, message: "No se actualizo" });
+
+  res.status(200).send(pedido);
 });
 
 router.delete(`/:id`, (req, res) => {
@@ -213,6 +228,25 @@ router.get(`/get/ventaTotales`, async (req, res) => {
     return res.status(500).json({ success: false, message: "No hubo ventas" });
 
   res.send({ total_ventas: total_venta.pop().total_ventas });
+});
+
+router.get(`/get/reporte`, async (req, res) => {
+  const orderLista = await Pedido.find({
+    estado: 3
+    })
+    .populate("usuario", "nombre")
+    .populate({
+      path: "order_prods",
+      populate: {
+        path: "producto",
+        populate: "categoria",
+      },
+    });
+
+
+  if (!orderLista) return res.status(500).json({ success: false });
+
+  res.status(200).send(orderLista);
 });
 
 router.get(`/get/cant`, async (req, res) => {
@@ -297,6 +331,83 @@ router.post("/create-checkout-session", async (req, res) => {
   });
 
   res.json({ id: session.id });
+});
+
+router.get(`/reporte_diario/:dia/:mes/:anio`, async (req, res) => {
+
+  var dia = req.params.dia
+  var mes = req.params.mes
+  var anio = req.params.anio
+
+  const orderLista = await Pedido.find({
+    estado: 3
+  })
+  .populate("usuario", "nombre")
+  .populate({
+    path: "order_prods",
+    populate: {
+      path: "producto",
+      populate: "categoria",
+    },
+  });
+  const ventaListaFiltro = orderLista.filter(
+    (venta) => venta.fecha_pedido.getDate()+1 == dia && venta.fecha_pedido.getMonth()+1 == mes && venta.fecha_pedido.getFullYear() == anio
+  ); 
+  if (!ventaListaFiltro) return res.status(500).json({ success: false });
+
+res.status(200).send(ventaListaFiltro);
+
+});
+
+router.get(`/reporte_mes/:mes/:anio`, async (req, res) => {
+
+  var mes = req.params.mes
+  var anio = req.params.anio
+  
+  const orderLista = await Pedido.find({
+    estado: 3
+  })
+  .populate("usuario", "nombre")
+  .populate({
+    path: "order_prods",
+    populate: {
+      path: "producto",
+      populate: "categoria",
+    },
+  });
+
+  const ventaListaFiltro = orderLista.filter(
+    (venta) => venta.fecha_pedido.getMonth()+1 == mes && venta.fecha_pedido.getFullYear() == anio
+  ); 
+  if (!ventaListaFiltro) return res.status(500).json({ success: false });
+
+res.status(200).send(ventaListaFiltro);
+
+});
+
+
+router.get(`/reporte_anio/:anio`, async (req, res) => {
+
+  var anio = req.params.anio
+  
+  const orderLista = await Pedido.find({
+    estado: 3
+  })
+  .populate("usuario", "nombre")
+  .populate({
+    path: "order_prods",
+    populate: {
+      path: "producto",
+      populate: "categoria",
+    },
+  });
+  const ventaListaFiltro = orderLista.filter(
+    (venta) => venta.fecha_pedido.getFullYear() == anio
+  ); 
+  if (!ventaListaFiltro) return res.status(500).json({ success: false });
+
+res.status(200).send(ventaListaFiltro);
+
 });
 
 module.exports = router;

@@ -183,63 +183,7 @@ router.get(`/kardex_simple/:id`, async (req, res) => {
   res.status(200).send(json_existencia);
 });
 
-router.get(`/reporte_diario/`, async (req, res) => {
 
-  var dia = req.body.dia
-  var mes = req.body.mes
-  var anio = req.body.anio
-
-  const orderLista = await Pedido.find({
-    estado: 2
-  })
-  .populate("usuario", "nombre")
-  .sort({ fecha_pedido: -1 });
-  const ventaListaFiltro = orderLista.filter(
-    (venta) => venta.fecha_pedido.getDate()+1 == dia && venta.fecha_pedido.getMonth()+1 == mes && venta.fecha_pedido.getFullYear() == anio
-  ); 
-  if (!ventaListaFiltro) return res.status(500).json({ success: false });
-
-res.status(200).send(ventaListaFiltro);
-
-});
-
-router.get(`/reporte_mes/`, async (req, res) => {
-
-  var mes = req.body.mes
-  var anio = req.body.anio
-  
-  const orderLista = await Pedido.find({
-    estado: 2
-  })
-  .populate("usuario", "nombre")
-  .sort({ fecha_pedido: -1 });
-  const ventaListaFiltro = orderLista.filter(
-    (venta) => venta.fecha_pedido.getMonth()+1 == mes && venta.fecha_pedido.getFullYear() == anio
-  ); 
-  if (!ventaListaFiltro) return res.status(500).json({ success: false });
-
-res.status(200).send(ventaListaFiltro);
-
-});
-
-
-router.get(`/reporte_anio/`, async (req, res) => {
-
-  var anio = req.body.anio
-  
-  const orderLista = await Pedido.find({
-    estado: 2
-  })
-  .populate("usuario", "nombre")
-  .sort({ fecha_pedido: -1 });
-  const ventaListaFiltro = orderLista.filter(
-    (venta) => venta.fecha_pedido.getFullYear() == anio
-  ); 
-  if (!ventaListaFiltro) return res.status(500).json({ success: false });
-
-res.status(200).send(ventaListaFiltro);
-
-});
 
 
 router.get(`/ventas/:id`, async (req, res) => {
